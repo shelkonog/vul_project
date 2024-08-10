@@ -6,7 +6,7 @@ import os
 import json
 
 
-xmlFile = 'export_3.xml'
+xmlFile = 'export_2.xml'
 
 
 def parseXML(xmlFile):
@@ -64,11 +64,11 @@ def parseXML(xmlFile):
 
             elif cve_head == 'cvss':
                 for cvss_head, cvss_param in cve_param['vector'].items():
-                    cve_dict['"' + 'cvss_' + cvss_head + '"'] = cvss_param
+                    cve_dict['cvss_' + cvss_head[1:]] = cvss_param
 
             elif cve_head == 'cvss3':
                 for cvss_head, cvss_param in cve_param['vector'].items():
-                    cve_dict['"' + 'cvss3_' + cvss_head + '"'] = cvss_param
+                    cve_dict['cvss3_' + cvss_head[1:]] = cvss_param
 
             elif cve_head == 'identifiers':
                 if type(cve_param['identifier']) is list:
@@ -126,8 +126,8 @@ def load_to_db(name_tbl, name_dct):
 
 def req_update_tbl(name_cve_tbl, name_tbl_rez):
     col_cve_tbl = '''identifier, name, description, cwe_identifier,
-                     identify_date, "cvss_@score", "cvss_#text",
-                     "cvss3_@score", "cvss3_#text", severity, solution,
+                     identify_date, "cvss_score", "cvss_text",
+                     "cvss3_score", "cvss3_text", severity, solution,
                      vul_status, exploit_status, fix_status, sources,
                      identifiers, other, vul_incident, vul_class'''
 
@@ -229,11 +229,11 @@ def req_creare_cve(name_tbl):
                         name varchar NOT NULL,
                         description varchar,
                         cwe_identifier varchar,
-                        identify_date varchar,
-                        "cvss_@score" varchar,
-                        "cvss_#text" varchar,
-                        "cvss3_@score" varchar,
-                        "cvss3_#text" varchar,
+                        identify_date date,
+                        "cvss_score" varchar,
+                        "cvss_text" varchar,
+                        "cvss3_score" varchar,
+                        "cvss3_text" varchar,
                         severity varchar,
                         solution varchar,
                         vul_status varchar,
