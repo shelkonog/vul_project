@@ -1,0 +1,24 @@
+html,
+body{
+  margin: 0;
+  padding: 0;
+}
+
+#container-main{
+
+}
+
+#left-bar-bdu{
+
+}
+#content-bdu{
+	margin-left: 20px;
+}
+#footer{
+	height: 60px; /* высота футера */
+	padding: 15px;
+	margin: auto;
+}
+#body-login{
+	margin-top: 10%;
+}

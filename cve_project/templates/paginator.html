@@ -1,0 +1,34 @@
+
+{% if page_obj.has_previous %}
+  <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">(Вперед)</a>
+
+  {% if page_obj.number > 3 %}
+      <a href="?q={{ request.GET.q }}&page=1">(1)</a>
+    {% if page_obj.number > 4 %}
+      <a >...</a>
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% for num in page_obj.paginator.page_range %}
+  {% if page_obj.number == num %}
+      <a href="?q={{ request.GET.q }}&page={{ num }}">({{ num }})</a>
+  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+      <a href="?q={{ request.GET.q }}&page={{ num }}">({{ num }})</a>
+  {% endif %}
+{% endfor %}
+
+{% if page_obj.has_next %}
+  {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+    <a >...</a>
+    <a href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">
+      ({{ page_obj.paginator.num_pages }})
+    </a>
+  {% elif page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+    <a href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">
+      ({{ page_obj.paginator.num_pages }})
+    </a>
+  {% endif %}
+
+  <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">(Назад)</a>
+{% endif %}
