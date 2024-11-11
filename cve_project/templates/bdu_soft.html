@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} База уязвимостей {% endblock title %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row g-3 mt-1">
+            <div id="content-bdu" class="col-md-12 col-sm-12 col-12">
+                <table class="table table-striped">
+                    <tbody>
+                        {% for cve in object_list %}
+                        <tr>
+                            <td><h4><a href="{{cve.id}}">{{ cve.identifier }}</a></h4></td>
+                            <td>{{ cve.soft_vendor }}</td>
+                            <td>{{ cve.soft_name }}</td>
+                            <td>{{ cve.soft_version }}</td>
+                            <td>{{ cve.soft_platform }}</td>
+                            <td>{{ cve.soft_type }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% include 'paginator.html' %}
+            </div>
+        </div>
+    {% else %}
+
+    {% endif %}
+{% endblock %}

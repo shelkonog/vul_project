@@ -30,3 +30,20 @@ class Vul_tbl(models.Model):
 
     def __str__(self):
         return self.identifier
+
+
+class Soft_tbl(models.Model):
+    identifier = models.CharField(max_length=20)
+    soft_vendor = models.CharField(max_length=200)
+    soft_name = models.CharField(max_length=200)
+    soft_version = models.CharField(max_length=200)
+    soft_platform = models.DateField()
+    soft_type = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = "soft_tbl_rez"
+        ordering = ('-id',)
+        managed = False
+
+    def __str__(self):
+        return self.identifier

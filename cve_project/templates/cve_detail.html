@@ -1,67 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row g-3 mt-1 mb-1">
-    <div class="col-md-auto col-sm-12 col-12" >
-        {{ object.identifier }}: {{ object.name }}
-    </div>
+    {% if user.is_authenticated %}
+        <div class="row g-3 mt-1 mb-1">
+            <div class="col-md-auto col-sm-12 col-12" >
+                {{ object.identifier }}: {{ object.name }}
+            </div>
 
-    <div id="content-bdu-detail" class="col-md-auto col-sm-12 col-12">
-        <table class="table table-striped">
-            <tbody>
-                <tr>
-                    <td>Описание уязвимости </td>
-                    <td>{{ object.description }}</td>
-                </tr>
-                <tr>
-                    <td>Дата выявления</td>
-                    <td>{{ object.identify_date|date:"d.m.Y" }}</td>
-                </tr>
-                <tr>
-                    <td>Уровень опасности уязвимости</td>
-                    <td>{{ object.severity }}</td>
-                </tr>
-                <tr>
-                    <td>Базовый вектор уязвимости </td>
-                    <td>
-                        {{ object.cvss_score }} -- {{ object.cvss_text }} <br>
-                        {{ object.cvss3_score }} -- {{ object.cvss3_text }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Статус уязвимости</td>
-                    <td>{{ object.vul_status}}</td>
-                </tr>
-                <tr>
-                    <td>Информация об устранении</td>
-                    <td>{{ object.fix_status}}</td>
-                </tr>
-                <tr>
-                    <td>Способ устранения </td>
-                    <td>{{ object.solution }}</td>
-                </tr>
-                <tr>
-                    <td>Способ эксплуатации </td>
-                    <td>{{ object.exploit_status }}</td>
-                </tr>
-                <tr>
-                    <td>Идентификатор типа ошибки</td>
-                    <td>{{ object.cwe_identifier }}</td>
-                </tr>
-                <tr>
-                    <td>Ссылки на источники </td>
-                    <td>{{ object.sources }}</td>
-                </tr>
-                <tr>
-                    <td>Идентификаторы других систем описаний уязвимостей </td>
-                    <td>{{ object.identifiers }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+            <div id="content-bdu-detail" class="col-md-auto col-sm-12 col-12">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td>Описание уязвимости </td>
+                            <td>{{ object.description }}</td>
+                        </tr>
+                        <tr>
+                            <td>Вендор </td>
+                            <td>
+                                {% for soft in soft_vendor_dist %}
+                                    {{ soft}} <br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <td>Наименование ПО </td>
+                            <td>
+                                {% for soft in soft_name_dist %}
+                                    {{ soft }} <br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Версия ПО</td>
+                            <td>
+                                {% for soft in soft_tbl %}
+                                    {{ soft.soft_version }} ( {{soft.soft_name}}) <br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Дата выявления</td>
+                            <td>{{ object.identify_date|date:"d.m.Y" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Уровень опасности уязвимости</td>
+                            <td>{{ object.severity }}</td>
+                        </tr>
+                        <tr>
+                            <td>Базовый вектор уязвимости </td>
+                            <td>
+                                {{ object.cvss_score }} -- {{ object.cvss_text }} <br>
+                                {{ object.cvss3_score }} -- {{ object.cvss3_text }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Статус уязвимости</td>
+                            <td>{{ object.vul_status}}</td>
+                        </tr>
+                        <tr>
+                            <td>Информация об устранении</td>
+                            <td>{{ object.fix_status}}</td>
+                        </tr>
+                        <tr>
+                            <td>Способ устранения </td>
+                            <td>{{ object.solution }}</td>
+                        </tr>
+                        <tr>
+                            <td>Способ эксплуатации </td>
+                            <td>{{ object.exploit_status }}</td>
+                        </tr>
+                        <tr>
+                            <td>Идентификатор типа ошибки</td>
+                            <td>{{ object.cwe_identifier }}</td>
+                        </tr>
+                        <tr>
+                            <td>Ссылки на источники </td>
+                            <td>{{ object.sources }}</td>
+                        </tr>
+                        <tr>
+                            <td>Идентификаторы других систем описаний уязвимостей </td>
+                            <td>{{ object.identifiers }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-</div>
+        </div>
 
-<p>Вернуться к <a href="{% url 'home' %}"> списку уязвимостей</a>.</p>
-
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-12" >
+                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
+                <p>Вернуться к <a href="{% url 'home' %}"> списку уязвимостей</a>.</p>
+            </div>
+        </div>
+    {% else %}
+    {% endif %}
 {% endblock content %}

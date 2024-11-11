@@ -20,9 +20,12 @@
                 {% include 'paginator.html' %}
             </div>
         </div>
-        <p>Вернуться к <a href="{% url 'home' %}"> списку уязвимостей</a>.</p>
-
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-12" >
+                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
+                <p>Вернуться к <a href="{% url 'home' %}"> списку уязвимостей</a>.</p>
+            </div>
+        </div>
     {% else %}
-
     {% endif %}
 {% endblock %}
