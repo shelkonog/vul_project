@@ -1,12 +1,10 @@
+from datetime import datetime
+from psycopg2 import Error
 import xmltodict
 import psycopg2
-from psycopg2 import Error
 import copy
 import os
 import json
-
-
-xmlFile = 'export_2.xml'
 
 
 def parseXML(xmlFile):
@@ -24,7 +22,7 @@ def parseXML(xmlFile):
         for cve_head, cve_param in cve.items():
             if cve_head == 'identifier':
                 cve_dict[cve_head] = cve_param
-                cve_soft_dict[cve_head] = cve_param
+                cve_soft_dict['identifier_id'] = cve_param
 
             if cve_head == 'vulnerable_software':
                 if type(cve_param['soft']) is list:
@@ -61,6 +59,13 @@ def parseXML(xmlFile):
 
             elif cve_head == 'cwe':
                 cve_dict['cwe_identifier'] = cve_param['identifier']
+
+            elif cve_head == 'identify_date':
+                try:
+                    datetime.strptime(cve_param, "%d.%m.%Y")
+                    cve_dict[cve_head] = cve_param
+                except ValueError:
+                    cve_dict[cve_head] = None
 
             elif cve_head == 'cvss':
                 for cvss_head, cvss_param in cve_param['vector'].items():
@@ -115,116 +120,65 @@ def exists_tbl(cursor, name_tbl):
     return bool(cursor.rowcount)
 
 
-def load_to_db(name_tbl, name_dct):
-    cols = name_dct.keys()
-    cols_str = ', '.join(cols)
-    vals = [json.dumps(name_dct[k]) if type(name_dct[k]) is dict else name_dct[k] for k in cols]
-    vals_str = ', '.join(["%s" for i in range(len(vals))])
-    ins_cve_soft = f"""INSERT INTO {name_tbl} ({cols_str}) VALUES ({vals_str})"""
-    return ins_cve_soft, vals
+def insert_cve_tbl(cursor, name_tbl, name_list):
+    for dct in name_list:
+        cols = dct.keys()
+        cols_str = ', '.join(cols)
+        vals = [json.dumps(dct[k]) if type(dct[k]) is dict else dct[k] for k in cols]
+        vals_str = ', '.join(["%s" for i in range(len(vals))])
+        ins_cve = f"""INSERT INTO {name_tbl} ({cols_str}) VALUES ({vals_str})"""
+        cursor.execute(ins_cve, vals)
 
 
-def req_update_tbl(name_cve_tbl, name_tbl_rez):
-    col_cve_tbl = '''identifier, name, description, cwe_identifier,
-                     identify_date, "cvss_score", "cvss_text",
-                     "cvss3_score", "cvss3_text", severity, solution,
-                     vul_status, exploit_status, fix_status, sources,
-                     identifiers, other, vul_incident, vul_class'''
+def insert_other_tbl(cursor, name_tbl, key, soft_tbl):
 
-    col_soft_tbl = '''identifier, soft_vendor, soft_name,
-                      soft_version, soft_platform, soft_type'''
+    req_type_soft = f"""INSERT INTO {name_tbl} ({key})
+                        select tbl.{key} from
+                        (SELECT DISTINCT {key} FROM {soft_tbl}) tbl
+                        where tbl.{key} not like '{{%}}';"""
 
-    if name_tbl_rez == 'cve_tbl_rez':
-        col_tbl = col_cve_tbl
-    else:
-        col_tbl = col_soft_tbl
+    cursor.execute(req_type_soft)
 
-    update_cve_tbl = f"""insert into {name_tbl_rez} ({col_tbl})
-                        select {col_tbl}
-                        from {name_cve_tbl} as T2
-                        where
-                        not exists (
-                            select identifier
-                            from {name_tbl_rez} as T1
+
+def req_update_tbl(cursor, name_tbl, name_tbl_rez, col, key):
+
+    req_update_tbl = f"""insert into {name_tbl_rez} ({col})
+                            select {col}
+                            from {name_tbl} as T2
                             where
-                                T1.identifier = T2.identifier);"""
+                            not exists (
+                                select {key}
+                                from {name_tbl_rez} as T1
+                                where
+                                    T1.{key} = T2.{key});"""
 
-    return update_cve_tbl
+    if exists_tbl(cursor, name_tbl_rez):
+        cursor.execute(req_update_tbl)
+        print(f'  В БД добавлено новых записей: {cursor.rowcount}')
+    else:
+        print(f'Базовая таблица не создана, необходимо создать модель таблицы {name_tbl_rez}')
 
 
-def add_cve_tobls():
+def creare_tbl(cursor, name_tbl, col_tbl):
+    req_create_tbl = f"""CREATE TABLE {name_tbl}
+                        ({col_tbl});"""
 
+    if exists_tbl(cursor, name_tbl):
+        cursor.execute(req_drop_tbl(name_tbl))
+        cursor.execute(req_create_tbl)
+    else:
+        cursor.execute(req_create_tbl)
+
+
+def proc_cve_db():
+
+    # Файл с БД УЯ
+    xmlFile = 'export_2.xml'
+
+    # Описание таблицы с CVE
     name_tbl_cve = 'cve_tbl'
-    name_tbl_soft = 'cve_soft_tbl'
     tbl_cve = 'cve_tbl_rez'
-    tbl_soft = 'soft_tbl_rez'
-
-    print('Обработка данных перед загрузкой в БД...')
-    cve_list, cve_soft_list = parseXML(xmlFile)
-
-    cursor, connector = conn_to_db()
-
-    try:
-        if exists_tbl(cursor, name_tbl_cve):
-            cursor.execute(req_drop_tbl(name_tbl_cve))
-            cursor.execute(req_creare_cve(name_tbl_cve))
-        else:
-            cursor.execute(req_creare_cve(name_tbl_cve))
-
-        if exists_tbl(cursor, name_tbl_soft):
-            cursor.execute(req_drop_tbl(name_tbl_soft))
-            cursor.execute(req_creare_soft(name_tbl_soft))
-        else:
-            cursor.execute(req_creare_soft(name_tbl_soft))
-
-        print('Загрузка данных в БД началась...')
-        for dct in cve_list:
-            ins_cve, vals = load_to_db(name_tbl_cve, dct)
-            cursor.execute(ins_cve, vals)
-
-        for dct in cve_soft_list:
-            ins_cve_soft, vals = load_to_db(name_tbl_soft, dct)
-            cursor.execute(ins_cve_soft, vals)
-        print('Данные загруженны в БД...')
-
-        print('Синхронизация данных таблиц началась...')
-        if exists_tbl(cursor, tbl_cve):
-            cursor.execute(req_update_tbl(name_tbl_cve, tbl_cve))
-            print(f'В БД добавлено новых описаний УЯ: {cursor.rowcount}')
-        else:
-            print('Базовая таблица не создана, необходимо запустить мастер создания таблиц...')
-        if exists_tbl(cursor, tbl_soft):
-            cursor.execute(req_update_tbl(name_tbl_soft, tbl_soft))
-        else:
-            print('Базовая таблица не создана, необходимо запустить мастер создания таблиц...')
-        print('Синхронизация данных завершена...')
-
-    except (Exception, Error) as error:
-        print("Ошибка при работе с БД ", error)
-
-    connector.commit()
-
-    if connector:
-        cursor.close()
-        connector.close()
-        print("Подключение к БД закрыто")
-
-
-def req_creare_soft(name_tbl):
-    req_create_soft = f"""CREATE TABLE {name_tbl}
-                        (id BIGSERIAL PRIMARY KEY NOT NULL,
-                        identifier varchar,
-                        soft_vendor varchar,
-                        soft_name varchar,
-                        soft_version varchar,
-                        soft_platform varchar,
-                        soft_type varchar);"""
-    return req_create_soft
-
-
-def req_creare_cve(name_tbl):
-    req_create_cve = f"""CREATE TABLE {name_tbl}
-                        (id BIGSERIAL PRIMARY KEY NOT NULL,
+    col_tbl_cve = '''id BIGSERIAL PRIMARY KEY NOT NULL,
                         identifier varchar NOT NULL,
                         name varchar NOT NULL,
                         description varchar,
@@ -243,37 +197,85 @@ def req_creare_cve(name_tbl):
                         identifiers varchar,
                         other varchar,
                         vul_incident varchar,
-                        vul_class varchar);"""
-    return req_create_cve
+                        vul_class varchar'''
+    col_cve = '''identifier, name, description, cwe_identifier,
+                     identify_date, "cvss_score", "cvss_text",
+                     "cvss3_score", "cvss3_text", severity, solution,
+                     vul_status, exploit_status, fix_status, sources,
+                     identifiers, other, vul_incident, vul_class'''
+    key_col_cve = 'identifier'
 
+    # Описание таблицы с ПО
+    name_tbl_soft = 'cve_soft_tbl'
+    tbl_soft = 'soft_tbl_rez'
+    col_tbl_soft = '''id BIGSERIAL PRIMARY KEY NOT NULL,
+                        identifier_id varchar,
+                        soft_vendor varchar,
+                        soft_name varchar,
+                        soft_version varchar,
+                        soft_platform varchar,
+                        soft_type varchar'''
+    col_soft = '''identifier_id, soft_vendor, soft_name,
+                      soft_version, soft_platform, soft_type'''
+    key_col_soft = 'identifier_id'
 
-def create_fth_tbls():
-    name_tbl_cve = 'cve_tbl_rez'
-    name_tbl_soft = 'soft_tbl_rez'
+    # Описание таблицы с типами ПО
+    name_tbl_type = 'tbl_soft_type'
+    tbl_type = 'tbl_soft_type_rez'
+    col_tbl_type = '''id BIGSERIAL PRIMARY KEY NOT NULL,
+                        soft_type varchar NOT NULL'''
+    col_soft_type = 'soft_type'
+    key_col_soft_type = 'soft_type'
+
+    print()
+    print('Обработка данных перед загрузкой в БД...')
+    cve_list, cve_soft_list = parseXML(xmlFile)
+    print('  Данные подготовлены')
 
     cursor, connector = conn_to_db()
 
-    # Создание таблицы 'soft_tbl_rez'
-    if exists_tbl(cursor, name_tbl_soft):
-        print(f'Таблица {name_tbl_soft} уже существует в БД')
-    else:
-        cursor.execute(req_creare_soft(name_tbl_soft))
-        print(f"Таблица {name_tbl_soft} успешно создана...")
+    try:
+        creare_tbl(cursor, name_tbl_cve, col_tbl_cve)
+        creare_tbl(cursor, name_tbl_soft, col_tbl_soft)
+        creare_tbl(cursor, name_tbl_type, col_tbl_type)
+        print('БД подготовлено для загрузки данных')
 
-    # Создание таблицы 'cve_tbl_rez'
-    if exists_tbl(cursor, name_tbl_cve):
-        print(f'Таблица {name_tbl_cve} уже существуют в БД')
-    else:
-        cursor.execute(req_creare_cve(name_tbl_cve))
-        print(f"Таблица {name_tbl_cve} успешно создана...")
+        print('Загрузка данных в БД началась...')
+        insert_cve_tbl(cursor, name_tbl_cve, cve_list)
+        print('  Загружен перечень уязвимостей')
+        insert_cve_tbl(cursor, name_tbl_soft, cve_soft_list)
+        print('  Загружен перечень ПО')
+        insert_other_tbl(cursor, name_tbl_type, key_col_soft_type, name_tbl_soft)
+        print('  Загружено описание типов ПО')
+        print('Все данные загруженны в БД')
+
+        print('Синхронизация таблицы с УЯ началась...')
+        req_update_tbl(cursor, name_tbl_cve, tbl_cve, col_cve, key_col_cve)
+        print('Синхронизация таблицы с ПО началась...')
+        req_update_tbl(cursor, name_tbl_soft, tbl_soft, col_soft, key_col_soft)
+        print('Синхронизация таблицы с типом ПО началась...')
+        req_update_tbl(cursor, name_tbl_type, tbl_type, col_soft_type, key_col_soft_type)
+        print('Синхронизация данных завершена')
+
+    except (Exception, Error) as error:
+        print("Ошибка при работе с БД ", error)
 
     connector.commit()
 
     if connector:
         cursor.close()
         connector.close()
-        print("Подключение к БД закрыто.")
+        print("Подключение к БД закрыто")
 
 
-create_fth_tbls()
-add_cve_tobls()
+def temp():
+    # Описание таблицы с ПО
+    tbl_name = 'tbl_soft_name'
+    tbl_name_rez = 'tbl_soft_name_rez'
+    col_tbl_name = '''id BIGSERIAL PRIMARY KEY NOT NULL,
+                        soft_name varchar NOT NULL,
+                        soft_ver varchar'''
+    col_name = 'soft_name, soft_ver'
+    key_col_name= 'soft_name'
+
+#proc_cve_db()

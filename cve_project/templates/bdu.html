@@ -6,13 +6,38 @@
     {% if user.is_authenticated %}
         <div class="row g-3 mt-1">
             <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary" >
-                <h3>Фильтрация</h3>
+                <h4>Фильтрация</h4>
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'cve_search' %}" method="get">
-                    <input name="q" type="search" placeholder="Search..." class="form-control" aria-label="Search">
+                    <div class="mb-3">
+                        <label for="search">Поиск по ID уязвимости</label>
+                        <input name="q1" class="form-control" type="search" placeholder="Введите ID уязвимости" aria-label="Search" id="search">
+                    </div>
+                    <div class="mb-3">
+                        <label for="search">Тип ПО</label>
+                        <select name="q2" class="form-select form-select-sm mb-3" type="search" id="js-select2-type-soft">
+                            <option label="Выберите тип ПО"></option>
+                            {% for soft in soft_type %}
+                                <option value='{{ soft}}'>{{ soft}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="search">Программное обеспечение</label>
+                        <input name="q3" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                    </div>
+                    <div class="mb-3">
+                        <label for="search">Уровень опасности</label>
+                        <input name="q4" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                    </div>
+                    <div class="mb-3">
+                        <label for="search">Год добавления</label>
+                        <input name="q5" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                    </div>
+                    <input name="fl" type="submit" class="btn btn-outline-light me-2" value="Применить">
                 </form>
             </div>
             <div id="content-bdu" class="col-md-8 col-sm-12 col-12 order-md-2 order-1">
-                <table class="table table-striped">
+                <table class="table table-striped" >
                     <tbody>
                         {% for cve in object_list %}
                         <tr>
@@ -26,6 +51,7 @@
                 {% include 'paginator.html' %}
             </div>
         </div>
+
     {% else %}
 
     {% endif %}

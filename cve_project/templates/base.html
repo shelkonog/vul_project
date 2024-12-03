@@ -27,6 +27,8 @@
         <link href="{% static 'css/headers.css' %}" rel="stylesheet">
         <link href="{% static 'css/sticky-footer.css' %}" rel="stylesheet">
         <link href="{% static 'css/bdu.css' %}" rel="stylesheet">
+        <link href="{% static 'css/select2.min.css' %}" rel="stylesheet">
+
     </head>
     <body class="d-flex flex-column h-100 bg-light">
             <header class="p-2 bg-dark text-white">
@@ -62,6 +64,20 @@
             </footer>
 
         <script src=" {% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/htmx.min.js' %}" defer></script>
+        <script src=" {% static 'js/jquery-3.7.1.min.js' %}"></script>
+        <script src=" {% static 'js/select2.min.js' %}"></script>
+        <script src=" {% static 'js/i18n/ru.js' %}"></script>
+        <script>
+            $(document).ready(function() {
+            $('#js-select2-type-soft').select2({
+                allowClear: true,
+                width: "resolve",
+                placeholder: "Выберите тип ПО",
+                language: "ru" });
+            });
+        </script>
+
     </body>
 
 </html>

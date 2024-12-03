@@ -3,47 +3,75 @@ from django.db import models
 
 # Create your models here.
 class Vul_tbl(models.Model):
-    identifier = models.CharField(max_length=20)
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=200)
-    cwe_identifier = models.CharField(max_length=200)
-    identify_date = models.DateField()
-    cvss_score = models.CharField(max_length=200)
-    cvss_text = models.CharField(max_length=200)
-    cvss3_score = models.CharField(max_length=200)
-    cvss3_text = models.CharField(max_length=200)
-    severity = models.CharField(max_length=200)
-    solution = models.CharField(max_length=200)
-    vul_status = models.CharField(max_length=200)
-    exploit_status = models.CharField(max_length=200)
-    fix_status = models.CharField(max_length=200)
-    sources = models.CharField(max_length=200)
-    identifiers = models.CharField(max_length=200)
-    other = models.CharField(max_length=200)
-    vul_incident = models.CharField(max_length=200)
-    vul_class = models.CharField(max_length=200)
+    identifier = models.CharField(unique=True)
+    name = models.CharField()
+    description = models.CharField(null=True)
+    cwe_identifier = models.CharField(null=True)
+    identify_date = models.DateField(null=True)
+    cvss_score = models.CharField(null=True)
+    cvss_text = models.CharField(null=True)
+    cvss3_score = models.CharField(null=True)
+    cvss3_text = models.CharField(null=True)
+    severity = models.CharField(null=True)
+    solution = models.CharField(null=True)
+    vul_status = models.CharField(null=True)
+    exploit_status = models.CharField(null=True)
+    fix_status = models.CharField(null=True)
+    sources = models.CharField(null=True)
+    identifiers = models.CharField(null=True)
+    other = models.CharField(null=True)
+    vul_incident = models.CharField(null=True)
+    vul_class = models.CharField(null=True)
 
     class Meta:
         db_table = "cve_tbl_rez"
         ordering = ('-id',)
-        managed = False
+        managed = True
 
     def __str__(self):
         return self.identifier
 
 
 class Soft_tbl(models.Model):
-    identifier = models.CharField(max_length=20)
-    soft_vendor = models.CharField(max_length=200)
-    soft_name = models.CharField(max_length=200)
-    soft_version = models.CharField(max_length=200)
-    soft_platform = models.DateField()
-    soft_type = models.CharField(max_length=200)
+    identifier = models.ForeignKey(Vul_tbl,
+                                   to_field='identifier',
+                                   on_delete=models.PROTECT,
+                                   related_name='softs')
+    soft_vendor = models.CharField(null=True)
+    soft_name = models.CharField(null=True)
+    soft_version = models.CharField(null=True)
+    soft_platform = models.CharField(null=True)
+    soft_type = models.CharField(null=True)
 
     class Meta:
         db_table = "soft_tbl_rez"
         ordering = ('-id',)
-        managed = False
+        managed = True
 
     def __str__(self):
         return self.identifier
+
+
+class Soft_type_tbl(models.Model):
+    soft_type = models.CharField(null=False)
+
+    class Meta:
+        db_table = "tbl_soft_type_rez"
+        ordering = ('-id',)
+        managed = True
+
+    def __str__(self):
+        return self.soft_type
+
+
+class Soft_name_tbl(models.Model):
+    soft_name = models.CharField(null=False)
+    soft_version = models.CharField(null=False)
+
+    class Meta:
+        db_table = "tbl_soft_name_rez"
+        ordering = ('-id',)
+        managed = True
+
+    def __str__(self):
+        return self.soft_name

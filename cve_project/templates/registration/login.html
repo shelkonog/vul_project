@@ -4,11 +4,13 @@
 
 {% block content %}
 <div id="body-login" class="row justify-content-center">
-    <div class="col-auto">
+    <div class="col-md-3 col-sm-5 col-5">
         <form method="post">
             {% csrf_token %}
             <h1 class="h3 mb-3 fw-normal">Please login</h1>
-            {{ form.as_p }}
+            <div>
+                {{ form.as_p }}
+            </div>
             <button class="btn btn-md btn-primary " type="submit">Login</button>
         </form>
     </div>

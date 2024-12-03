@@ -15,6 +15,13 @@
                             <td>{{ object.description }}</td>
                         </tr>
                         <tr>
+                            <td>Тип ПО </td>
+                            <td>
+                                {% for soft in soft_type_dist %}
+                                    {{ soft}} <br>
+                                {% endfor %}
+                            </td>
+                        <tr>
                             <td>Вендор </td>
                             <td>
                                 {% for soft in soft_vendor_dist %}
@@ -22,7 +29,7 @@
                                 {% endfor %}
                             </td>
                         </tr>
-                        <td>Наименование ПО </td>
+                            <td>Наименование ПО </td>
                             <td>
                                 {% for soft in soft_name_dist %}
                                     {{ soft }} <br>
@@ -33,7 +40,7 @@
                             <td>Версия ПО</td>
                             <td>
                                 {% for soft in soft_tbl %}
-                                    {{ soft.soft_version }} ( {{soft.soft_name}}) <br>
+                                    {{ soft.soft_version}} ( {{soft.soft_name}}) <br>
                                 {% endfor %}
                             </td>
                         </tr>
