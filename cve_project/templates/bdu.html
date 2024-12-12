@@ -8,30 +8,39 @@
             <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary" >
                 <h4>Фильтрация</h4>
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'cve_search' %}" method="get">
-                    <div class="mb-3">
+                    <div class="mb-3" name="ID CVE">
                         <label for="search">Поиск по ID уязвимости</label>
                         <input name="q1" class="form-control" type="search" placeholder="Введите ID уязвимости" aria-label="Search" id="search">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" name="Тип ПО">
                         <label for="search">Тип ПО</label>
-                        <select name="q2" class="form-select form-select-sm mb-3" type="search" id="js-select2-type-soft">
+                        <select name="q2" class="form-select" data-width="100%" type="search" id="js-select2-type-soft">
                             <option label="Выберите тип ПО"></option>
                             {% for soft in soft_type %}
                                 <option value='{{ soft}}'>{{ soft}}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" name="ПО">
                         <label for="search">Программное обеспечение</label>
-                        <input name="q3" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                        <select name="q3" class="form-select" data-width="100%" type="search" id="js-select2-name">
+                            <option label="Выберите наименование ПО"></option>
+                        </select>
                     </div>
+                    <div class="mb-3" name="Версия ПО">
+                        <label for="search">Версия ПО</label>
+                        <select name="q4" class="form-select" data-width="100%" type="search" id="js-select2-version">
+                            <option label="Выберите версию ПО"></option>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label for="search">Уровень опасности</label>
-                        <input name="q4" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                        <input name="q6" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
                     </div>
                     <div class="mb-3">
                         <label for="search">Год добавления</label>
-                        <input name="q5" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                        <input name="q7" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
                     </div>
                     <input name="fl" type="submit" class="btn btn-outline-light me-2" value="Применить">
                 </form>

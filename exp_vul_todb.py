@@ -130,17 +130,17 @@ def insert_cve_tbl(cursor, name_tbl, name_list):
         cursor.execute(ins_cve, vals)
 
 
-def insert_other_tbl(cursor, name_tbl, key, soft_tbl):
+def insert_other_tbl(cursor, name_tbl, key, soft_tbl, filter=''):
 
     req_type_soft = f"""INSERT INTO {name_tbl} ({key})
-                        select tbl.{key} from
+                        select {key} from
                         (SELECT DISTINCT {key} FROM {soft_tbl}) tbl
-                        where tbl.{key} not like '{{%}}';"""
+                        {filter};"""
 
     cursor.execute(req_type_soft)
 
 
-def req_update_tbl(cursor, name_tbl, name_tbl_rez, col, key):
+def req_update_tbl(cursor, name_tbl, name_tbl_rez, col, key, filter):
 
     req_update_tbl = f"""insert into {name_tbl_rez} ({col})
                             select {col}
@@ -149,8 +149,7 @@ def req_update_tbl(cursor, name_tbl, name_tbl_rez, col, key):
                             not exists (
                                 select {key}
                                 from {name_tbl_rez} as T1
-                                where
-                                    T1.{key} = T2.{key});"""
+                                {filter});"""
 
     if exists_tbl(cursor, name_tbl_rez):
         cursor.execute(req_update_tbl)
@@ -204,6 +203,7 @@ def proc_cve_db():
                      vul_status, exploit_status, fix_status, sources,
                      identifiers, other, vul_incident, vul_class'''
     key_col_cve = 'identifier'
+    fltr_upd_cve = 'where T1.identifier = T2.identifier'
 
     # Описание таблицы с ПО
     name_tbl_soft = 'cve_soft_tbl'
@@ -218,6 +218,7 @@ def proc_cve_db():
     col_soft = '''identifier_id, soft_vendor, soft_name,
                       soft_version, soft_platform, soft_type'''
     key_col_soft = 'identifier_id'
+    fltr_upd_soft = 'where T1.identifier_id = T2.identifier_id'
 
     # Описание таблицы с типами ПО
     name_tbl_type = 'tbl_soft_type'
@@ -225,7 +226,17 @@ def proc_cve_db():
     col_tbl_type = '''id BIGSERIAL PRIMARY KEY NOT NULL,
                         soft_type varchar NOT NULL'''
     col_soft_type = 'soft_type'
-    key_col_soft_type = 'soft_type'
+    fltr_ins_type = f"where tbl.{col_soft_type} not like '{{%}}'"
+    fltr_upd_type = 'where T1.soft_type = T2.soft_type'
+
+    # Описание таблицы с наименованием ПО
+    tbl_name = 'tbl_soft_name'
+    tbl_name_rez = 'tbl_soft_name_rez'
+    col_tbl_name = '''id BIGSERIAL PRIMARY KEY NOT NULL,
+                        soft_name varchar NOT NULL,
+                        soft_version varchar'''
+    col_name = 'soft_name, soft_version'
+    fltr_upd_name = 'where T1.soft_name = T2.soft_name and T1.soft_version = T2.soft_version'
 
     print()
     print('Обработка данных перед загрузкой в БД...')
@@ -237,7 +248,9 @@ def proc_cve_db():
     try:
         creare_tbl(cursor, name_tbl_cve, col_tbl_cve)
         creare_tbl(cursor, name_tbl_soft, col_tbl_soft)
+
         creare_tbl(cursor, name_tbl_type, col_tbl_type)
+        creare_tbl(cursor, tbl_name, col_tbl_name)
         print('БД подготовлено для загрузки данных')
 
         print('Загрузка данных в БД началась...')
@@ -245,16 +258,20 @@ def proc_cve_db():
         print('  Загружен перечень уязвимостей')
         insert_cve_tbl(cursor, name_tbl_soft, cve_soft_list)
         print('  Загружен перечень ПО')
-        insert_other_tbl(cursor, name_tbl_type, key_col_soft_type, name_tbl_soft)
+        insert_other_tbl(cursor, name_tbl_type, col_soft_type, name_tbl_soft, fltr_ins_type)
         print('  Загружено описание типов ПО')
+        insert_other_tbl(cursor, tbl_name, col_name, name_tbl_soft)
+        print('  Загружено описание наименований ПО')
         print('Все данные загруженны в БД')
 
         print('Синхронизация таблицы с УЯ началась...')
-        req_update_tbl(cursor, name_tbl_cve, tbl_cve, col_cve, key_col_cve)
+        req_update_tbl(cursor, name_tbl_cve, tbl_cve, col_cve, key_col_cve, fltr_upd_cve)
         print('Синхронизация таблицы с ПО началась...')
-        req_update_tbl(cursor, name_tbl_soft, tbl_soft, col_soft, key_col_soft)
+        req_update_tbl(cursor, name_tbl_soft, tbl_soft, col_soft, key_col_soft, fltr_upd_soft)
         print('Синхронизация таблицы с типом ПО началась...')
-        req_update_tbl(cursor, name_tbl_type, tbl_type, col_soft_type, key_col_soft_type)
+        req_update_tbl(cursor, name_tbl_type, tbl_type, col_soft_type, col_soft_type, fltr_upd_type)
+        print('Синхронизация таблицы с наименованием ПО началась...')
+        req_update_tbl(cursor, tbl_name, tbl_name_rez, col_name, col_name, fltr_upd_name)
         print('Синхронизация данных завершена')
 
     except (Exception, Error) as error:
@@ -268,14 +285,5 @@ def proc_cve_db():
         print("Подключение к БД закрыто")
 
 
-def temp():
-    # Описание таблицы с ПО
-    tbl_name = 'tbl_soft_name'
-    tbl_name_rez = 'tbl_soft_name_rez'
-    col_tbl_name = '''id BIGSERIAL PRIMARY KEY NOT NULL,
-                        soft_name varchar NOT NULL,
-                        soft_ver varchar'''
-    col_name = 'soft_name, soft_ver'
-    key_col_name= 'soft_name'
-
-#proc_cve_db()
+if __name__ == "__main__":
+    proc_cve_db()

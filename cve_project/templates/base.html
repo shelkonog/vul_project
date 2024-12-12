@@ -68,15 +68,80 @@
         <script src=" {% static 'js/jquery-3.7.1.min.js' %}"></script>
         <script src=" {% static 'js/select2.min.js' %}"></script>
         <script src=" {% static 'js/i18n/ru.js' %}"></script>
+
         <script>
             $(document).ready(function() {
-            $('#js-select2-type-soft').select2({
-                allowClear: true,
-                width: "resolve",
-                placeholder: "Выберите тип ПО",
-                language: "ru" });
-            });
+                $('#js-select2-type-soft').select2({
+                    allowClear: true,
+                    width: "resolve",
+                    placeholder: "Выберите тип ПО",
+                    language: "ru" });
+
+                $('#js-select2-name').select2({
+                    ajax: {
+                        url: 'ajax',
+                        dataType: "json",
+                        type: "GET",
+                        data: function (params) {
+                        return {
+                            q: params.term };
+                        },
+                     },
+                    allowClear: true,
+                    placeholder: "Выберите наименование ПО",
+                    minimumInputLength: 3,
+                    width  :   'element',
+                    language: "ru" });
+
+                $('#js-select2-version').select2({
+                    placeholder: "Выберите сначала ПО",
+                    disabled: true,
+                    tags: false,
+                    language: "ru" });
+
+                var select = $('#js-select2-version');
+                select.empty();
+                $("#js-select2-name").change(function() {
+                    var id = $(this).val();
+                    select.empty();
+                    $.ajax({
+                        url: 'ajax_ver',
+                        dataType: "json",
+                        type: "GET",
+                        data: {q: id},
+                        success: function(resp) {
+                            len = resp.results;
+                            $('#js-select2-version').select2({
+                                placeholder: "Выберите версию ПО",
+                                allowClear: true,
+                                data: len,
+                                disabled: false,
+                                tags: false,
+                                language: "ru" });
+                        },
+                        });
+                    });
+                });
         </script>
+
+        <!--
+            var select = $('#js-select2-version'),
+            cache = select.clone();
+            select.empty();
+            $('.cloned').append(cache);
+            $("#js-select2-name").change(function() {
+                var id = $(this).val(),
+                options = [];
+                select.empty();
+                cache.find('option').each(function () {
+                    if (id === '') {
+                        select.empty();}
+                    else
+                        if ($(this).data('val') === id) {
+                            select.append($(this).clone());}
+                });
+                });
+        -->
 
     </body>
 

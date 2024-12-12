@@ -2,7 +2,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.db.models import F
-from . models import Vul_tbl, Soft_tbl, Soft_type_tbl
+from django.http import JsonResponse, HttpResponse
+from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl
 
 
 class SoftListView(LoginRequiredMixin, ListView):
@@ -22,6 +23,29 @@ class CVEListView(LoginRequiredMixin, ListView):
         context = super(CVEListView, self).get_context_data(**kwargs)
         context['soft_type'] = Soft_type_tbl.objects.all()
         return context
+
+
+def get_ajax_query(request):
+    context = []
+    search = request.GET.get('q')
+    resp = Soft_name_tbl.objects.all()
+    resp = resp.filter(soft_name__icontains=search)
+    resp2 = resp.order_by().values_list('soft_name', flat=True).distinct()
+    for i in resp2:
+        context.append({'id': i, 'text': i})
+    return JsonResponse({'results': context}, safe=False)
+
+
+def get_ajax_ver_query(request):
+    context = []
+    search = request.GET.get('q')
+    if search:
+        resp = Soft_name_tbl.objects.all()
+        resp = resp.filter(soft_name__icontains=search)
+        resp2 = resp.values_list('soft_version', flat=True)
+        for i in resp2:
+            context.append({'id': i, 'text': i})
+    return JsonResponse({'results': context}, safe=False)
 
 
 class CVEDetailView(LoginRequiredMixin, DetailView):
@@ -49,8 +73,14 @@ class CVESearchView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset()
         search1 = self.request.GET.get('q1')
         search2 = self.request.GET.get('q2')
+        search3 = self.request.GET.get('q3')
+        search4 = self.request.GET.get('q4')
         if search1:
             queryset = queryset.filter(identifier__icontains=search1)
         if search2:
             queryset = queryset.filter(softs__soft_type=search2)
+        if search3:
+            queryset = queryset.filter(softs__soft_name=search3)
+            if search4:
+                queryset = queryset.filter(softs__soft_version=search4)
         return queryset
