@@ -1,23 +1,29 @@
 {% extends 'base.html' %}
 
+{% block title %} Результат поиска {% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item"><a href="/">Перечень уязвимостей</a></li>
+<li class="breadcrumb-item active" aria-current="page">Результат поиска</li>
+{% endblock %}
 {% block content %}
     {% if user.is_authenticated %}
 
-        {% block title %} Результат поиска {% endblock %}
         <div class="row g-3 mt-1 mb-1">
             <div id="content-bdu" class="col-md-auto col-sm-12 col-12 order-md-2 order-1">
                 <table class="table table-striped">
                     <tbody>
                         {% for cve in object_list %}
                         <tr>
-                            <td><h4><a href="{{cve.id}}">{{ cve.identifier }}</a></h4></td>
+                            <td><a href="{{cve.id}}">{{ cve.identifier }}</a></td>
                             <td><p>{{ cve.name }}</p></td>
                             <td>{{ cve.identify_date|date:"d.m.Y" }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% include 'paginator.html' %}
+                {% include 'paginator2.html' %}
             </div>
         </div>
         <div class="row">

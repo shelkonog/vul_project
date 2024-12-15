@@ -1,9 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView
-from django.db.models import F
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
+import datetime
+from cve_manager.templatetags import query_transform
 from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl
+
+register = query_transform
 
 
 class SoftListView(LoginRequiredMixin, ListView):
@@ -20,12 +22,20 @@ class CVEListView(LoginRequiredMixin, ListView):
     login_url = 'login'
 
     def get_context_data(self, **kwargs):
+        level = ['Критический', 'Высокий', 'Средний', 'Низкий', 'Нет опасности']
+        year = datetime.datetime.today().year
+        year_list = list(range(year, year-35, -1))
+
         context = super(CVEListView, self).get_context_data(**kwargs)
+
         context['soft_type'] = Soft_type_tbl.objects.all()
+        context['severity'] = level
+        context['year_cve'] = year_list
         return context
 
 
 def get_ajax_query(request):
+    #todo объединить повторяющиейся код
     context = []
     search = request.GET.get('q')
     resp = Soft_name_tbl.objects.all()
@@ -37,6 +47,7 @@ def get_ajax_query(request):
 
 
 def get_ajax_ver_query(request):
+    #todo объединить повторяющиейся код
     context = []
     search = request.GET.get('q')
     if search:
@@ -71,16 +82,20 @@ class CVESearchView(LoginRequiredMixin, ListView):
 
     def get_queryset(self, ):
         queryset = super().get_queryset()
-        search1 = self.request.GET.get('q1')
-        search2 = self.request.GET.get('q2')
-        search3 = self.request.GET.get('q3')
-        search4 = self.request.GET.get('q4')
-        if search1:
-            queryset = queryset.filter(identifier__icontains=search1)
-        if search2:
-            queryset = queryset.filter(softs__soft_type=search2)
-        if search3:
-            queryset = queryset.filter(softs__soft_name=search3)
-            if search4:
-                queryset = queryset.filter(softs__soft_version=search4)
+        qury_dict = self.request.GET
+
+        if qury_dict['q1']:
+            queryset = queryset.filter(identifier__icontains=qury_dict['q1'])
+        if qury_dict['q2']:
+            queryset = queryset.filter(softs__soft_type=qury_dict['q2'])
+        if qury_dict['q3']:
+            queryset = queryset.filter(softs__soft_name=qury_dict['q3'])
+            if 'q4' in qury_dict:
+                if qury_dict['q4']:
+                    queryset = queryset.filter(softs__soft_version=qury_dict['q4'])
+        if qury_dict['q5']:
+            queryset = queryset.filter(severity__icontains=qury_dict['q5'])
+        if qury_dict['q6']:
+            queryset = queryset.filter(identify_date__year=qury_dict['q6'])
+
         return queryset

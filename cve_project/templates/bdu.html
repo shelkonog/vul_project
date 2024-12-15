@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %} База уязвимостей {% endblock title %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item active" aria-current="page">Перечень уязвимостей</li>
+{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="row g-3 mt-1">
-            <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary" >
-                <h4>Фильтрация</h4>
+            <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
+                <h4 style="text-align: center;">  Фильтрация</h4>
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'cve_search' %}" method="get">
                     <div class="mb-3" name="ID CVE">
                         <label for="search">Поиск по ID уязвимости</label>
@@ -33,16 +39,27 @@
                             <option label="Выберите версию ПО"></option>
                         </select>
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-3" name="Уровень опасности">
                         <label for="search">Уровень опасности</label>
-                        <input name="q6" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                        <select name="q5" class="form-select" data-width="100%" type="search" id="js-select2-severrety">
+                            <option label="Выберите уровень опасности"></option>
+                            {% for level in severity %}
+                                <option value='{{level}}'>{{level}}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" name="Год УЯ">
                         <label for="search">Год добавления</label>
-                        <input name="q7" class="form-control" type="search" placeholder="Search..." aria-label="Search" id="search">
+                        <select name="q6" class="form-select" data-width="100%" type="search" id="js-select2-year">
+                            <option label="Выберите год добавления УЯ"></option>
+                            {% for level in year_cve %}
+                                <option value='{{level}}'>{{level}}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <input name="fl" type="submit" class="btn btn-outline-light me-2" value="Применить">
+                    <div class="mb-3" name="Фильтрация">
+                        <input name="fl" type="submit" class="btn btn-outline-light me-2" value="Применить">
+                    </div>
                 </form>
             </div>
             <div id="content-bdu" class="col-md-8 col-sm-12 col-12 order-md-2 order-1">
@@ -50,18 +67,15 @@
                     <tbody>
                         {% for cve in object_list %}
                         <tr>
-                            <td><h4><a href="{{cve.id}}">{{ cve.identifier }}</a></h4></td>
+                            <td><a href="{{cve.id}}">{{ cve.identifier }}</a></td>
                             <td><p>{{ cve.name }}</p></td>
                             <td>{{ cve.identify_date|date:"d.m.Y" }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% include 'paginator.html' %}
+                {% include 'paginator2.html' %}
             </div>
         </div>
-
-    {% else %}
-
     {% endif %}
 {% endblock %}

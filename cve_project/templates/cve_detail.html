@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
 
+{% block title %} Описание уязвимости {% endblock title %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item"><a href="/">Перечень уязвимостей</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ object.identifier }}</li>
+{% endblock %}
+
 {% block content %}
     {% if user.is_authenticated %}
         <div class="row g-3 mt-1 mb-1">
             <div class="col-md-auto col-sm-12 col-12" >
-                {{ object.identifier }}: {{ object.name }}
+               <h5 class=fw-bold> {{ object.identifier }}: {{ object.name }} </h5>
             </div>
 
             <div id="content-bdu-detail" class="col-md-auto col-sm-12 col-12">

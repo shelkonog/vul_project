@@ -31,118 +31,60 @@
 
     </head>
     <body class="d-flex flex-column h-100 bg-light">
-            <header class="p-2 bg-dark text-white">
-                <div class="container">
-                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                            <li><a href="/" class="nav-link px-2 text-white">БД УЯ</a></li>
-                            <li><a href="#" class="nav-link px-2 text-white">Письма</a></li>
-                            <li><a href="#" class="nav-link px-2 text-white">Ссылка</a></li>
-                        </ul>
-                        {% if user.is_authenticated %}
-                            {{ user.username }} &nbsp
-                            <form class="text-end" method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-light me-2">Logout</button>
-                            </form>
-                        {% else %}
+        <header class="p-2 bg-dark text-white">
+            <div class="container">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="/" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Уязвимости
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="/">Перечень уязвимостей</a></li>
+                                <li><a class="dropdown-item" href="#">Письма ФСТЭК</a></li>
+                                <li><a class="dropdown-item" href="#">Программное обеспечение</a></li>
+                            </ul>
+                        </li>
 
-                        {% endif %}
-                    </div>
+                        <li><a href="#" class="nav-link px-2 text-white">Угрозы</a></li>
+                        <li><a href="#" class="nav-link px-2 text-white">Сертификаты</a></li>
+                    </ul>
+
+                    {% if user.is_authenticated %}
+                        <form class="text-end" method="post" action="{% url 'logout' %}">
+                            {{ user.username }} &nbsp
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light me-2">Выйти</button>
+                        </form>
+                    {% endif %}
                 </div>
-            </header>
-            <div id="container-main" class="container">
-                {% block content %}{% endblock %}
             </div>
-            <footer class="footer mt-auto bg-light">
-                <div id="footer" class="container">
-                    <span class="text-muted">
-                    © 2024 Томск &nbsp
-                    <a href="#">Наверх</a>
-                    </span>
-                </div>
-            </footer>
+        </header>
+
+        <div id="container-main" class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% block breadcrumb %} {% endblock %}
+                </ol>
+            </nav>
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="footer mt-auto bg-light">
+            <div id="footer" class="container">
+                <span class="text-muted">
+                © 2024 Томск &nbsp
+                <a href="#">Наверх</a>
+                </span>
+            </div>
+        </footer>
 
         <script src=" {% static 'js/bootstrap.bundle.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/htmx.min.js' %}" defer></script>
         <script src=" {% static 'js/jquery-3.7.1.min.js' %}"></script>
         <script src=" {% static 'js/select2.min.js' %}"></script>
         <script src=" {% static 'js/i18n/ru.js' %}"></script>
-
-        <script>
-            $(document).ready(function() {
-                $('#js-select2-type-soft').select2({
-                    allowClear: true,
-                    width: "resolve",
-                    placeholder: "Выберите тип ПО",
-                    language: "ru" });
-
-                $('#js-select2-name').select2({
-                    ajax: {
-                        url: 'ajax',
-                        dataType: "json",
-                        type: "GET",
-                        data: function (params) {
-                        return {
-                            q: params.term };
-                        },
-                     },
-                    allowClear: true,
-                    placeholder: "Выберите наименование ПО",
-                    minimumInputLength: 3,
-                    width  :   'element',
-                    language: "ru" });
-
-                $('#js-select2-version').select2({
-                    placeholder: "Выберите сначала ПО",
-                    disabled: true,
-                    tags: false,
-                    language: "ru" });
-
-                var select = $('#js-select2-version');
-                select.empty();
-                $("#js-select2-name").change(function() {
-                    var id = $(this).val();
-                    select.empty();
-                    $.ajax({
-                        url: 'ajax_ver',
-                        dataType: "json",
-                        type: "GET",
-                        data: {q: id},
-                        success: function(resp) {
-                            len = resp.results;
-                            $('#js-select2-version').select2({
-                                placeholder: "Выберите версию ПО",
-                                allowClear: true,
-                                data: len,
-                                disabled: false,
-                                tags: false,
-                                language: "ru" });
-                        },
-                        });
-                    });
-                });
-        </script>
-
-        <!--
-            var select = $('#js-select2-version'),
-            cache = select.clone();
-            select.empty();
-            $('.cloned').append(cache);
-            $("#js-select2-name").change(function() {
-                var id = $(this).val(),
-                options = [];
-                select.empty();
-                cache.find('option').each(function () {
-                    if (id === '') {
-                        select.empty();}
-                    else
-                        if ($(this).data('val') === id) {
-                            select.append($(this).clone());}
-                });
-                });
-        -->
-
+        <script src=" {% static 'js/custom/ajax_select2.js' %}"></script>
     </body>
 
 </html>
