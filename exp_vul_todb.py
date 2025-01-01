@@ -3,13 +3,23 @@ from psycopg2 import Error
 import xmltodict
 import psycopg2
 import copy
-import os
 import json
+import environ
+from pathlib import Path
+import sys
 
 
 def parseXML(xmlFile):
-    with open(xmlFile, 'r', encoding='utf-8') as file:
-        my_xml = file.read()
+
+    try:
+        with open(xmlFile, 'r', encoding='utf-8') as file:
+            my_xml = file.read()
+    except OSError as e:
+        print(f"Произошла ошибка при загрузке файла export_2.xml с УЯ: {e}")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        print(f"Произошла ошибка при загрузке файла export_2.xml с УЯ: {e}")
+        sys.exit(1)
 
     cve_dict = dict()
     cve_soft_dict = dict()
@@ -88,14 +98,18 @@ def parseXML(xmlFile):
 
 
 def conn_to_db():
+    print()
     try:
+        env = environ.Env()
+        environ.Env.read_env()
+        environ.Env.read_env(env_file=Path('.env'))
         # Подключение к существующей базе данных
         connection = psycopg2.connect(
-                        user=os.environ.get('PG_USER'),
-                        password=os.environ.get('PG_PASSWORD'),
-                        host=os.environ.get('PG_HOST'),
-                        port=os.environ.get('PG_PORT'),
-                        database=os.environ.get('PG_DATABASE'))
+                        user=env('POSTGRES_USER'),
+                        password=env('POSTGRES_PASSWORD'),
+                        host=env('POSTGRES_HOST'),
+                        port=env('POSTGRES_PORT'),
+                        database=env('POSTGRES_DB'))
 
         # Курсор для выполнения операций с базой данных
         cursor = connection.cursor()
@@ -238,12 +252,12 @@ def proc_cve_db():
     col_name = 'soft_name, soft_version'
     fltr_upd_name = 'where T1.soft_name = T2.soft_name and T1.soft_version = T2.soft_version'
 
+    cursor, connector = conn_to_db()
+
     print()
     print('Обработка данных перед загрузкой в БД...')
     cve_list, cve_soft_list = parseXML(xmlFile)
     print('  Данные подготовлены')
-
-    cursor, connector = conn_to_db()
 
     try:
         creare_tbl(cursor, name_tbl_cve, col_tbl_cve)

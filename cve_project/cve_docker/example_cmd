@@ -1,0 +1,16 @@
+# make archive image
+docker save alpine -o alpine-image.tar
+docker load -i alpine-image.tar
+docker build . -t name:tag
+
+# requriments for exp_vul_todb.py
+apt install libpq-dev | dnf install postgresql-devel
+pip install psycopg2
+pip install xmltodict
+
+# generate ssl
+openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout ./cve_nginx.key -out ./cve_nginx.crt
+
+
+
+

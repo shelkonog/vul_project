@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 class Vul_tbl(models.Model):
-    identifier = models.CharField(unique=True)
+    identifier = models.CharField(max_length=255, unique=True)
     name = models.CharField()
     description = models.CharField(null=True)
     cwe_identifier = models.CharField(null=True)
