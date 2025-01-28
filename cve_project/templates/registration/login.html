@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 {% load static %}
-<link href="{% static 'css/signin.css' %}" rel="stylesheet">
 
 {% block content %}
-<div id="body-login" class="row justify-content-center">
-    <div class="col-md-3 col-sm-5 col-5">
-        <form method="post">
-            {% csrf_token %}
-            <h1 class="h3 mb-3 fw-normal">Вход в приложение</h1>
-            <div>
-                {{ form.as_p }}
+<div class="modal modal-sheet position-static d-block p-4 py-md-5" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded-4">
+            <div class="modal-header justify-content-center ">
+                <h1 class="h3 mb-3 fw-normal">Приложение</h1>
             </div>
-            <button class="btn btn-md btn-primary " type="submit">Login</button>
-        </form>
+                <form method="post" >
+                    {% csrf_token %}
+                    <div class="modal-body flex-column align-self-center justify-content-center w-50 gap-2 pb-3">
+                        {{ form.as_p }}
+                    </div>
+                    <div class="modal-footer flex-column align-items-stretch w-100 gap-2 pb-3 border-top-0">
+                    <button class="btn btn-md btn-primary " type="submit">Войти</button>
+                    </div>
+                </form>
+        </div>
     </div>
 </div>
-
 {% endblock %}

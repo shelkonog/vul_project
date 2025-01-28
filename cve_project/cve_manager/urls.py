@@ -12,4 +12,5 @@ urlpatterns = [
     path('ajax', views.get_ajax_query, name='ajax'),
     path('ajax_ver', views.get_ajax_ver_query, name='ajax_ver'),
     path('soft/', views.SoftListView.as_view(), name='cve_soft'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('bul/', views.BulletinSearchView.as_view(), name='bulletin'),
+]

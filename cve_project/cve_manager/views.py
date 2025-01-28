@@ -3,7 +3,7 @@ from django.views.generic import ListView, DetailView
 from django.http import JsonResponse
 import datetime
 from cve_manager.templatetags import query_transform
-from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl
+from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl, Bulletin
 
 register = query_transform
 
@@ -99,3 +99,10 @@ class CVESearchView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(identify_date__year=qury_dict['q6'])
 
         return queryset
+
+
+class BulletinSearchView(LoginRequiredMixin, ListView):
+    model = Bulletin
+    template_name = 'bulletin.html'
+    paginate_by = 4
+    login_url = 'login'

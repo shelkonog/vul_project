@@ -5,9 +5,8 @@ import environ
 
 
 env = environ.Env()
-environ.Env.read_env()
-environ.Env.read_env(env_file=Path('./cve_docker/.env'))
-
+# environ.Env.read_env()
+environ.Env.read_env(env_file=Path('../cve_docker/.env'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +22,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = True
+
+# Настройки для прода
+#DEBUG = False
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
 
@@ -38,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'cve_manager',
-    'django.contrib.postgres',
 
     # 3rd party apps
     'django_htmx',
+    'django.contrib.postgres',
+    'django_opensearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -80,15 +83,28 @@ WSGI_APPLICATION = 'cve_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': env.db()
+    'default': env.db()
+
+    # Настройки для прода
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': env('POSTGRES_DB'),
+    #     'USER': env('POSTGRES_USER'),
+    #     'PASSWORD': env('POSTGRES_PASSWORD'),
+    #     'HOST': env('POSTGRES_HOST'),
+    #     'PORT': env('POSTGRES_PORT'),
+    # }
+}
+
+OPENSEARCH_DSL = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
-    }
+        'hosts': 'localhost:9200'
+    },
+    'secure': {
+        'hosts': [{"scheme": "https", "host": "127.0.0.1", "port": 9200}],
+        'http_auth': (),
+        'timeout': 120,
+    },
 }
 
 # Password validation
@@ -141,7 +157,36 @@ DATE_FORMAT = 'd-m-y'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Сброс сессии при закрытии окна браузера
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# SESSION_COOKIE_AGE = 1800
+
+# Настройки для прода
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     "handlers": {
+#         "file": {
+#             "class": "logging.FileHandler",
+#             "filename": "/var/log/cve_manager/general.log",
+#             },
+#     },
+
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'INFO',
+#             'propagate': True,
+#         },
+#         'users.admin': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
