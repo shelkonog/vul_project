@@ -12,5 +12,5 @@ urlpatterns = [
     path('ajax', views.get_ajax_query, name='ajax'),
     path('ajax_ver', views.get_ajax_ver_query, name='ajax_ver'),
     path('soft/', views.SoftListView.as_view(), name='cve_soft'),
-    path('bul/', views.BulletinSearchView.as_view(), name='bulletin'),
+    path('vul/', views.search_bulliten, name='vul_list'),
 ]

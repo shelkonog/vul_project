@@ -75,17 +75,3 @@ class Soft_name_tbl(models.Model):
 
     def __str__(self):
         return self.soft_name
-
-
-class Bulletin(models.Model):
-    title = models.CharField()
-    description = models.CharField()
-    vendorId = models.CharField()
-    type = models.CharField()
-    bulletinFamily = models.CharField()
-    published = models.DateField()
-    affectedSoftware = models.CharField()
-    affectedPackage = models.CharField()
-    affectedPackage = models.CharField()
-    vulnStatus = models.CharField()
-    cvss3 = models.CharField()

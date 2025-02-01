@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     # 3rd party apps
     'django_htmx',
     'django.contrib.postgres',
-    'django_opensearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -94,17 +93,6 @@ DATABASES = {
     #     'HOST': env('POSTGRES_HOST'),
     #     'PORT': env('POSTGRES_PORT'),
     # }
-}
-
-OPENSEARCH_DSL = {
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-    'secure': {
-        'hosts': [{"scheme": "https", "host": "127.0.0.1", "port": 9200}],
-        'http_auth': (),
-        'timeout': 120,
-    },
 }
 
 # Password validation

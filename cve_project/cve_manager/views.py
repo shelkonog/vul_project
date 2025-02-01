@@ -1,9 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
 from django.http import JsonResponse
-import datetime
 from cve_manager.templatetags import query_transform
-from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl, Bulletin
+from django.shortcuts import render
+from datetime import datetime
+from . models import Vul_tbl, Soft_tbl, Soft_type_tbl, Soft_name_tbl
+from . search_query import connect_to_OS, get_search_query
+from django.core.paginator import Paginator
+from pathlib import Path
+import environ
 
 register = query_transform
 
@@ -23,7 +28,7 @@ class CVEListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         level = ['Критический', 'Высокий', 'Средний', 'Низкий', 'Нет опасности']
-        year = datetime.datetime.today().year
+        year = datetime.today().year
         year_list = list(range(year, year-35, -1))
 
         context = super(CVEListView, self).get_context_data(**kwargs)
@@ -101,8 +106,37 @@ class CVESearchView(LoginRequiredMixin, ListView):
         return queryset
 
 
-class BulletinSearchView(LoginRequiredMixin, ListView):
-    model = Bulletin
-    template_name = 'bulletin.html'
-    paginate_by = 4
-    login_url = 'login'
+def search_bulliten(request):
+    format_data = "%Y-%m-%dT%H:%M:%S"
+    context = {}
+    env = environ.Env()
+    environ.Env.read_env(env_file=Path('./cve_docker/.env'))
+
+    adress = eval(env('ES_ADDRESS'))
+    auth = tuple((env('ES_AUTH')).split())
+
+    index_name = 'es6_bulletins_bulletin'
+    query_dict = request.GET.get('q1')
+    print('###########################3', query_dict)
+    if query_dict:
+        search_word = query_dict
+    else:
+        search_word = ''
+
+    client = connect_to_OS(auth, adress)
+    response = get_search_query(search_word, index_name, client)
+
+    # преобразование метки времени из строки формата ISO в дату
+    for hit in response:
+        hit.published = datetime.strptime(hit.published, format_data)
+
+    list_responce = list(response)
+    paginator = Paginator(list_responce, 4)
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    context['page_obj'] = page_obj
+    print("!!!!!pagi!!!!!!", page_obj.object_list)
+
+    context['vul'] = response
+    return render(request, 'bulletin.html', context)
