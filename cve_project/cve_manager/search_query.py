@@ -21,7 +21,7 @@ def get_search_query(search_query, index_name, client):
             "bool": {
                 "filter": {
                     "range": {
-                        "published": {"gte": "now-30d/d"}}},
+                        "published": {"gte": "now-120d/d"}}},
                 "must": [{
                     "query_string": {
                         "query": search_query,

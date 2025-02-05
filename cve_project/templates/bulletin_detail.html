@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Перечень бюлетеней {% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item active" aria-current="page">Поиск бюлетеней</li>
+{% endblock %}
+{% block content %}
+    {% if user.is_authenticated %}
+
+    <h4 style="text-align: center;"> Описание бюлетеня</h4>
+
+        <div class="row g-3 mt-1 mb-1">
+
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                  <a class="nav-link " aria-current="page" href="#">Сводные данные</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active" href="#">В формате json</a>
+                </li>
+              </ul>
+        </div>
+
+        <div class="row g-3 mt-1 mb-1">
+            <div id="content-vul" class="col-md-auto col-sm-12 col-12 order-md-2 order-1">
+                <table class="table table-striped">
+                    <tbody>
+                        {% for key, val in vul_hit_id.items %}
+                        <tr>
+                            <td><p> {{key}}: </p></td>
+                            <td><p> {{val}}  </p></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% include 'paginator2.html' %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-12" >
+                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
+                <p>Вернуться к <a href="{% url 'vul_list' %}"> поиску бюлетеней</a>.</p>
+            </div>
+        </div>
+    {% else %}
+    {% endif %}
+{% endblock %}

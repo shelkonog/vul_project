@@ -25,11 +25,17 @@
                 <table class="table table-striped">
                     <tbody>
                         <tr>
-                            Результат поиска: {{vul.hits.total.value}}
+                            {%if vul_total > 0 %}
+                                Всего в БД по данному запросу: {{vul_total}} <br>
+                                Загружено в приложение: {{vul}}
+                            {% else %}
+                                По данному запросу ничего не найденно.
+                            {% endif %}
                         </tr>
-                        {% for hit in page_obj %}
+                        {% for hit, ind in page_obj_all %}
                         <tr>
-                            <td>{{hit.title}}</td>
+                            <td><a href="{% url 'hit_detail' ind %}"> {{hit.id}} </a></td>
+                            <td>{{ind}}</td>
                             <td>{{hit.description}}</td>
                             <td>{{hit.type}}</td>
                             <td>{{hit.cvss.severity}}</td>

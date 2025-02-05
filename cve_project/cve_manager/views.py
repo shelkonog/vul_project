@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from cve_manager.templatetags import query_transform
 from django.shortcuts import render
 from datetime import datetime
@@ -11,6 +11,8 @@ from pathlib import Path
 import environ
 
 register = query_transform
+list_responce = []
+
 
 
 class SoftListView(LoginRequiredMixin, ListView):
@@ -109,15 +111,17 @@ class CVESearchView(LoginRequiredMixin, ListView):
 def search_bulliten(request):
     format_data = "%Y-%m-%dT%H:%M:%S"
     context = {}
+    vul_lst = None
     env = environ.Env()
     environ.Env.read_env(env_file=Path('./cve_docker/.env'))
+    global list_responce
+    num_pag = 4
 
     adress = eval(env('ES_ADDRESS'))
     auth = tuple((env('ES_AUTH')).split())
 
-    index_name = 'es6_bulletins_bulletin'
+    index_name = 'os_bulletins'
     query_dict = request.GET.get('q1')
-    print('###########################3', query_dict)
     if query_dict:
         search_word = query_dict
     else:
@@ -131,12 +135,37 @@ def search_bulliten(request):
         hit.published = datetime.strptime(hit.published, format_data)
 
     list_responce = list(response)
-    paginator = Paginator(list_responce, 4)
+    paginator = Paginator(list_responce, num_pag)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    context['page_obj'] = page_obj
-    print("!!!!!pagi!!!!!!", page_obj.object_list)
 
-    context['vul'] = response
+    if page_obj:
+        if not page_number:
+            vul_range = range(1, num_pag+1)
+        else:
+            vul_range = range(paginator.page(page_number).start_index(), paginator.page(page_number).end_index()+1)
+        vul_lst = list(vul_range)
+    else:
+        vul_lst = None
+
+    if (page_obj or vul_lst) is not None:
+        page_obj_all = zip(page_obj, vul_lst)
+    else:
+        page_obj_all = None
+    context['page_obj'] = page_obj
+    context['page_obj_all'] = page_obj_all
+
+    context['vul'] = len(list_responce)
+    context['vul_total'] = response.hits.total.value
+
     return render(request, 'bulletin.html', context)
+
+
+def detail_bulliten(request, hit_id):
+    global list_responce
+    context = {}
+    if list_responce and hit_id > 0:
+        context['vul_hit_id'] = list_responce[hit_id - 1].to_dict()
+
+    return render(request, 'bulletin_detail.html', context)
