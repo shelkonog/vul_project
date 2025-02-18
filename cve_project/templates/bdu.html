@@ -11,6 +11,10 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="row g-3 mt-1">
+            <h4 style="text-align: center;">
+                <strong class="fw-bold"> Перечень уязвимостей из БД ФСТЭК России</strong>
+            </h4>
+
             <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
                 <h4 style="text-align: center;">  Фильтрация</h4>
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'cve_search' %}" method="get">

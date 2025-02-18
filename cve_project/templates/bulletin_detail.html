@@ -23,28 +23,35 @@
                 </li>
               </ul>
         </div>
-
         <div class="row g-3 mt-1 mb-1">
             <div id="content-vul" class="col-md-auto col-sm-12 col-12 order-md-2 order-1">
-                <table class="table table-striped">
-                    <tbody>
-                        {% for key, val in vul_hit_id.items %}
-                        <tr>
-                            <td><p> {{key}}: </p></td>
-                            <td><p> {{val}}  </p></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% include 'paginator2.html' %}
+                {% if vul_hit_id %}
+                    <table class="table table-striped">
+                        <tbody>
+                            {% for key, value in vul_hit_id.items %}
+                            <tr>
+                                <td><p> {{ key }}: </p></td>
+                                <td><p> {{ value }}  </p></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% include 'paginator2.html' %}
+                {% elif error %}
+                    <strong class="fw-bold text-danger"> {{error}} </strong>
+                {% else %}
+                    <strong class="fw-bold"> Описание бюлетеня по индентификатору не найдено </strong>
+                {% endif %}
+
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12 col-sm-12 col-12" >
-                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
-                <p>Вернуться к <a href="{% url 'vul_list' %}"> поиску бюлетеней</a>.</p>
-            </div>
-        </div>
+
     {% else %}
     {% endif %}
+{% endblock %}
+{% block footer %}
+    <ul class="nav justify-content-center border-bottom ">
+        <li class="nav-item"><a href="{{request.META.HTTP_REFERER|escape}}" class="nav-link px-2 text-body-secondary">Назад</a></li>
+        <li class="nav-item"><a href="{% url 'audit_bul' %}" class="nav-link px-2 text-body-secondary">Аудит пакетов Linux</a></li>
+    </ul>
 {% endblock %}

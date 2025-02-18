@@ -25,7 +25,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
 # Настройки для прода
-#DEBUG = False
+# DEBUG = False
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
 
@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'cve_manager',
 
     # 3rd party apps
-    'django_htmx',
     'django.contrib.postgres',
 ]
 
@@ -54,7 +53,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_htmx.middleware.HtmxMiddleware',
 ]
 
 ROOT_URLCONF = 'cve_project.urls'

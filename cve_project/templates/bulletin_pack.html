@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Аудит пакетов Linux {% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item active" aria-current="page">Аудит пакетов Linux</li>
+{% endblock %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row g-3 mt-1 mb-1">
+            <h4 style="text-align: center;">
+            <strong class="fw-bold">Аудит пакетов Linux</strong> </h4>
+
+            <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
+                <h4 style="text-align: center;"> База бюлетеней </h4>
+                <ul class="list-group mt-3">
+                    {% for key, value in stat_db.items %}
+                        <li class="list-group-item justify-content-between align-items-center">
+                            <strong class="fw-bold">{{key}}:</strong>
+                            <span class="badge bg-primary rounded-pill"> {{value.0}} </span>
+                            <br>
+                            <strong class="fw-bold"> обновление базы:</strong>
+                            <span class="badge bg-primary rounded-pill"> {{value.1|date:"d.m.Y"}} </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if not dict_hit and not lst_pack %}
+                <div class="col-md-8 col-sm-12 col-12  order-1">
+                    <form method="get" class="was-validated">
+                        <!-- {% csrf_token %} -->
+                        <div class="mb-3">
+                            Для получения списка пакетов ОС Linux выполните команду в оболочке (shel|bash) <br>
+                            -   для rpm пакетов (например, RedOS)
+                            <p class="text-warning text-start bg-dark">
+                                rpm -qa --qf '%{NAME} %{VERSION}-%{RELEASE} %{ARCH}\n'
+                            </p>
+                            -   для dep пакетов (например, Debian)
+                            <p class="text-warning text-start bg-dark">
+                                dpkg-query -W -f='${Status} ${Package} ${Version} ${Architecture}\n'|awk '($1 == "install" || $1 == "hold") && ($2 == "ok") {print $4" "$5" "$6}'
+                            </p>
+
+                            <label for="OS" class="form-label">Выберете дитрибутив Linux</label>
+                            <select class="form-select" required aria-label="select example" name="OS" id="OS">
+                                <option value="">Выберите дистрибутив Linux</option>
+                                {% for OS in lst_OS %}
+                                    <option value='{{ forloop.counter0 }}'>{{ OS.0 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pack" class="form-label"> Перечень пакетов Linux </label>
+                            <textarea class="form-control" name="pack" id="pack"
+                                placeholder="Внесите наименивание пакетов в формате: имя версия архитектура.
+                                Например, curl 7.88.1-10+deb12u8 amd64"
+                                required></textarea>
+                            <div class="invalid-feedback">
+                                Добавьте описание пакетов в формате: curl 7.88.1-10+deb12u8 amd64
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                        <button class="btn btn-outline-dark" type="submit">Проверить</button>
+                        </div>
+                    </form>
+                </div>
+            {% elif error %}
+                <strong class="fw-bold text-danger"> {{ error }} </strong>
+            {% else %}
+                <div class="col-md-8 col-sm-12 col-12  order-1">
+
+                        <strong class="fw-bold">Аудит программных пакетов: </strong>
+
+                        <ul class="list-group list-group-horizontal">
+                            <li class="list-group-item list-group-item-light">
+                                <p class="fw-bolder">
+                                    {% for pack in lst_pack %}
+                                        {{ pack.0 }} &nbsp&nbsp&nbsp
+                                    {% endfor %}</p></li>
+                        </ul>
+
+                    <div class="w-50 mt-3 mb-3">
+                        <ul class="list-group mt-3">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong class="fw-bold">Обнаружено бюлетеней:</strong>
+                            <span class="badge bg-primary rounded-pill"> {{ vul_total }} </span>
+                            </li>
+                            {% if not dict_hit.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong class="fw-bold">Актуальных бюлетеней: </strong>
+                            <span class="badge bg-primary rounded-pill"> 0 </span>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong class="fw-bold">Актуальных бюлетеней: </strong>
+                            <span class="badge bg-primary rounded-pill"> {{ vul_act }} </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <ol class="list-group list-group-numbered">
+                        {% for pack, hits in dict_hit.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-start list-group-item-dark">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold"> {{ pack }} </div>
+                            {% for hit in hits %}
+
+                                <ul class="list-group list-group-horizontal">
+                                    <li class="list-group-item">
+                                        <a href="{% url 'audit_detail' hit.id %}"> {{hit.id}} </a>
+                                    </li>
+                                    <li class="list-group-item"> {{ hit.cvelist }} </li>
+                                    <li class="list-group-item"> {{ hit.cvss.severity }} </li>
+                                    <li class="list-group-item"> {{ hit.published }} </li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{  hits|length  }}</span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+    {% else %}
+    {% endif %}
+    {% endblock %}
+
+{% block footer %}
+    <ul class="nav justify-content-center border-bottom ">
+        <li class="nav-item"><a href="{{request.META.HTTP_REFERER|escape}}" class="nav-link px-2 text-body-secondary">Назад</a></li>
+        <li class="nav-item"><a href="{% url 'audit_bul' %}" class="nav-link px-2 text-body-secondary">Аудит пакетов Linux</a></li>
+        {%if query_OS_pdf%}
+            <li class="nav-item"><a href="{% url 'pdf_view' query_OS_pdf %}" class="nav-link px-2 text-body-secondary">Экспорт в pdf</a></li>
+        {%endif%}
+    </ul>
+{% endblock %}

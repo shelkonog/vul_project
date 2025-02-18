@@ -10,50 +10,128 @@
 {% block content %}
     {% if user.is_authenticated %}
 
-    <h4 style="text-align: center;"> Поиск бюлетеней</h4>
+<div class="row g-3 mt-1">
+    <h4 style="text-align: center;">
+        <strong class="fw-bold">Поиск бюлетеней </strong>
+    </h4>
 
-    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'vul_list' %}" method="get">
-        <div class="input-group" name="ID CVE">
-            <input name="q1" class="form-control" type="search" placeholder="Введите запрос" aria-label="Search" id="search">
-            <input name="fl" type="submit" class="btn btn-outline-dark me-2" value="Поиск">
-        </div>
-    </form>
-        <div class="row g-3 mt-1 mb-1"> </div>
+    <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
+        <h4 style="text-align: center;"> База бюлетеней </h4>
+        <ul class="list-group mt-3">
+            {% for key, value in stat_db.items %}
+                <li class="list-group-item justify-content-between align-items-center">
+                    <strong class="fw-bold">{{key}}:</strong>
+                    <span class="badge bg-primary rounded-pill"> {{value.0}} </span>
+                    <br>
+                    <strong class="fw-bold"> обновление базы:</strong>
+                    <span class="badge bg-primary rounded-pill"> {{value.1|date:"d.m.Y"}} </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-        <div class="row g-3 mt-1 mb-1">
-            <div id="content-bdu" class="col-md-auto col-sm-12 col-12 order-md-2 order-1">
-                <table class="table table-striped">
-                    <tbody>
-                        <tr>
-                            {%if vul_total > 0 %}
-                                Всего в БД по данному запросу: {{vul_total}} <br>
-                                Загружено в приложение: {{vul}}
-                            {% else %}
-                                По данному запросу ничего не найденно.
-                            {% endif %}
-                        </tr>
-                        {% for hit, ind in page_obj_all %}
-                        <tr>
-                            <td><a href="{% url 'hit_detail' ind %}"> {{hit.id}} </a></td>
-                            <td>{{ind}}</td>
-                            <td>{{hit.description}}</td>
-                            <td>{{hit.type}}</td>
-                            <td>{{hit.cvss.severity}}</td>
-                            <td>{{hit.published|date:"d.m.Y"}}</td>
-                            <td>{{hit.meta.score}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% include 'paginator2.html' %}
+    <div id="content-bdu" class="col-md-8 col-sm-12 col-12  order-1">
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'vul_list' %}" method="get">
+            <div class="input-group" name="ID CVE">
+                {% if not word %}
+                    <input name="q1" class="form-control" type="search" placeholder="Введите запрос" aria-label="Search" id="search">
+                {% else %}
+                    <input name="q1" value="{{word}}" class="form-control" type="search" placeholder="Введите запрос" aria-label="Search" id="search">
+                {% endif %}
+                    <input name="fl" type="submit" class="btn btn-outline-dark me-2" value="Поиск">
             </div>
+                <div class="row" mt-30>
+                    <div class="col bg-light p-3 border">
+                        <label for="dateRange" class="form-label">Диапазон дат публикации, в месецах от текущей даты</label>
+                        <input name="date" value="{{date}}" type="range" class="form-range" min="2" max="360" step="2" id="dateRange">
+                        <p>
+                            Текущее значение:
+                            <span id="curr_date"></span>
+                        </p>
+                    </div>
+                    <div class="col bg-light p-3 border"">
+                        <label for="countRange" class="form-label">Размер выборки, количество полученных ответов</label>
+                        <input name="count" value="{{count}}" type="range" class="form-range" min="20" max="200" step="10" id="countRange">
+                        <p>
+                            Текущее значение:
+                            <span id="curr_count"></span>
+                        </p>
+                    </div>
+                </div>
+        </form>
+
+        {%if vul_total > 0 %}
+        <div class="w-50 mt-3 mb-3">
+            <ul class="list-group mt-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <strong class="fw-bold">Всего в БД по данному запросу:</strong>
+                    <span class="badge bg-primary rounded-pill"> {{ vul_total }} </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <strong class="fw-bold">Загружено в приложение:</strong>
+                    <span class="badge bg-primary rounded-pill"> {{ vul }} </span>
+                </li>
         </div>
-        <div class="row">
-            <div class="col-md-12 col-sm-12 col-12" >
-                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
-                <p>Вернуться к <a href="{% url 'vul_list' %}"> поиску бюлетеней</a>.</p>
-            </div>
-        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col-1">№</th>
+                    <th scope="col-1">Идентификатор</th>
+                    <th scope="col-6">Описание</th>
+                    <th scope="col-1">Тип базы источника</th>
+                    <th scope="col-1">Критичность</th>
+                    <th scope="col-1">Дата публикации</th>
+                    <th scope="col-1">Релевантность</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hit, ind in page_obj_all %}
+                    <tr>
+                        <td>{{ind}}</td>
+                        <td><a href="{% url 'audit_detail' hit.id %}"> {{hit.id}} </a></td>
+                        <td>{{hit.description}}</td>
+                        <td>{{hit.type}}</td>
+                        <td>{% if hit.cvss.severity %}
+                                {{hit.cvss.severity}}
+                            {%else%}
+                                {{hit.cvss_}}
+                            {% endif %}</td>
+                        <td>{{hit.published|date:"d.m.Y"}}</td>
+                        <td>{{hit.meta.score}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'paginator2.html' %}
+
+        {% elif error %}
+        <strong class="fw-bold text-danger"> {{error}} </strong>
+        {% else %}
+        <strong class="fw-bold"> По данному запросу ничего не найденно </strong>
+        {% endif %}
+    </div>
+</div>
+
+        <script>
+            var el = document.getElementById('curr_date');
+            var r = document.getElementById('dateRange');
+            el.innerText = r.valueAsNumber;
+            r.addEventListener('change', () => {
+                el.innerText = r.valueAsNumber;
+            })
+            var el2 = document.getElementById('curr_count');
+            var r2 = document.getElementById('countRange');
+            el2.innerText = r2.valueAsNumber;
+            r2.addEventListener('change', () => {
+                el2.innerText = r2.valueAsNumber;
+            })
+        </script>
     {% else %}
     {% endif %}
+{% endblock %}
+{% block footer %}
+    <ul class="nav justify-content-center border-bottom ">
+        <li class="nav-item"><a href="{{request.META.HTTP_REFERER|escape}}" class="nav-link px-2 text-body-secondary">Назад</a></li>
+        <li class="nav-item"><a href="{% url 'vul_list' %}" class="nav-link px-2 text-body-secondary">Поиск бюлетеней</a></li>
+    </ul>
 {% endblock %}

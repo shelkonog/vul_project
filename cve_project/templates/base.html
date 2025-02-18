@@ -42,6 +42,8 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <li><a class="dropdown-item" href="/">Перечень уязвимостей ФСТЭК</a></li>
                                 <li><a class="dropdown-item" href="/vul">Поиск бюлетеней</a></li>
+                                <li><a class="dropdown-item" href="/audit">Аудит пакетов Linux</a></li>
+                                <li><a class="dropdown-item" href="http://opensearch:5601/app/home/">Анализ бюлетеней</a></li>
                                 <li><a class="dropdown-item" href="#">Программное обеспечение</a></li>
                             </ul>
                         </li>
@@ -71,20 +73,16 @@
         </div>
 
         <footer class="footer mt-auto bg-light">
-            <div id="footer" class="container">
-                <span class="text-muted">
-                © 2024 Томск &nbsp
-                <a href="#">Наверх</a>
-                </span>
-            </div>
-        </footer>
+            {% block footer %}{% endblock %}
+            <p class="text-center text-body-secondary">© 2024 Томск </p>
 
+        </footer>
+    </body>
         <script src=" {% static 'js/bootstrap.bundle.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/htmx.min.js' %}" defer></script>
         <script src=" {% static 'js/jquery-3.7.1.min.js' %}"></script>
         <script src=" {% static 'js/select2.min.js' %}"></script>
         <script src=" {% static 'js/i18n/ru.js' %}"></script>
         <script src=" {% static 'js/custom/ajax_select2.js' %}"></script>
-    </body>
 
 </html>

@@ -1,0 +1,39 @@
+{% extends 'base_pdf.html' %}
+{% load static %}
+
+{% block title %} Отчет "Аудит Linux" {% endblock %}
+
+
+{% block content %}
+    {% if user.is_authenticated %}
+        {% for pack, hits in dict_hit.items %}
+            <p></p>
+            <div> {{ pack }} </div>
+            <div>
+                Количество бюлетеней: {{  hits|length  }}
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">№ CVE</th>
+                        <th scope="col">Уровень опасности</th>
+                        <th scope="col">Дата публикации</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hit in hits %}
+                    <tr>
+                        {% if hit.cvelist %}
+                            <td> {{ hit.cvelist }} </td>
+                        {% else %}
+                            <td> {{ hit.id }} </td>
+                        {% endif %}
+                        <td> {{ hit.cvss.severity }}</td>
+                        <td> {{ hit.published }} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

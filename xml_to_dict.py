@@ -5,7 +5,8 @@ from dateutil import parser
 
 
 def formateDate(str_data):
-    return str(parser.parse(str_data).date()) + 'T00:00:05.600000009Z'
+    # 2025-01-31T12:15:29
+    return str(parser.parse(str_data).date()) + 'T12:15:29'
 
 def createJSON(xmlFile):
 

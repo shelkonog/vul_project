@@ -1,0 +1,19 @@
+{% load static %}
+
+<!doctype html>
+<html >
+    <head>
+        <title>{% block title %}  {% endblock title %}</title>
+    </head>
+    <body class="d-flex flex-column h-100 bg-light">
+        <header class="p-2 bg-dark text-white">
+
+        </header>
+
+        <div id="container-main" class="container">
+            <h1> Отчет </h1>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+
+</html>

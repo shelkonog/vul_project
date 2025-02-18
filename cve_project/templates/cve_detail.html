@@ -98,15 +98,14 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
 
-        <div class="row">
-            <div class="col-md-12 col-sm-12 col-12" >
-                <a href="{{request.META.HTTP_REFERER|escape}}">Вернуться назад</a>
-                <p>Вернуться к <a href="{% url 'home' %}"> списку уязвимостей</a>.</p>
-            </div>
-        </div>
     {% else %}
     {% endif %}
 {% endblock content %}
+{% block footer %}
+    <ul class="nav justify-content-center border-bottom ">
+        <li class="nav-item"><a href="{{request.META.HTTP_REFERER|escape}}" class="nav-link px-2 text-body-secondary">Назад</a></li>
+        <li class="nav-item"><a href="{% url 'home' %}" class="nav-link px-2 text-body-secondary">Список уязвимостей</a></li>
+    </ul>
+{% endblock %}
