@@ -48,8 +48,31 @@
                             </ul>
                         </li>
 
-                        <li><a href="#" class="nav-link px-2 text-white">Угрозы</a></li>
-                        <li><a href="#" class="nav-link px-2 text-white">Сертификаты</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="/" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Угрозы
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="/measures">Меры защиты</a></li>
+                                <li><a class="dropdown-item" href="#">Угрозы</a></li>
+                                <li><a class="dropdown-item" href="#">Способы реализации</a></li>
+                                <li><a class="dropdown-item" href="#">Объекты</a></li>
+                                <li><a class="dropdown-item" href="#">Компоненты</a></li>
+                                <li><a class="dropdown-item" href="#">Негативные последствия</a></li>
+                                <li><a class="dropdown-item" href="#">Нарушители</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="/" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Справочники
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="#"> Перечень сертификатов ФСТЭК </a></li>
+                                <li><a class="dropdown-item" href="/help"> Справка по приложению </a></li>
+                            </ul>
+                        </li>
+
                     </ul>
 
                     {% if user.is_authenticated %}

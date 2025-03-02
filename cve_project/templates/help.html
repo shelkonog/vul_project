@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Меры защиты {% endblock title %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item active" aria-current="page">Справка по приложению</li>
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row g-3 mt-1">
+            <h4 style="text-align: center;">
+                <strong class="fw-bold"> Поля индекса с бюлетенями</strong>
+            </h4>
+
+            <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
+                <h4 style="text-align: center;"> Разделы справки </h4>
+                <nav class="nav flex-column">
+                    <a class="nav-link active link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " aria-current="page" href="/help"> Поля индекса с бюлетенями </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="/help/query"> Синтаксис запросов </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="/help/cvss"> Описание полей CVSS </a>
+                </nav>
+            </div>
+            <div id="content-bdu" class="col-md-8 col-sm-12 col-12 order-md-2 order-1">
+                {% for field in fields %}
+                <strong> {{ field.topic|linebreaks  }} </strong>
+                    {{ field.content|linebreaksbr }}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

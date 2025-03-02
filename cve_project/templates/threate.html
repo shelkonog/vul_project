@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Меры защиты {% endblock title %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Главная</a></li>
+<li class="breadcrumb-item active" aria-current="page">Меры защиты</li>
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row g-3 mt-1">
+            <h4 style="text-align: center;">
+                <strong class="fw-bold"> Меры защиты</strong>
+            </h4>
+
+            <div id="left-bar-bdu" class="col-md-3 col-sm-12 col-12 order-md-1 order-2 bg-secondary text-light" >
+                <h4 style="text-align: center;"> Справочники </h4>
+                <nav class="nav flex-column">
+                    <a class="nav-link active link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " aria-current="page" href="/measures"> Меры защиты </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Угрозы </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Способ реализации </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Объекты </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Компоненты </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Негативные последствия </a>
+                    <a class="nav-link link-light focus-ring focus-ring-light py-2 px-4 text-decoration-none " href="#"> Нарушители </a>
+                </nav>
+            </div>
+            <div id="content-bdu" class="col-md-8 col-sm-12 col-12 order-md-2 order-1">
+                {% for name_gr, value in measure.items %}
+                <p class="text-start text-dark">
+                    <a class="btn btn-outline-secondary" data-bs-toggle="collapse" href="#{{forloop.counter}}" role="button" aria-expanded="false">
+                        {{ name_gr }}
+                    </a>
+                </p>
+                {% with sub_gr_number=forloop.counter%}
+                <div class="collapse multi-collapse ms-5" id="{{forloop.counter}}">
+                    {% for name_sub_gr, value2 in value.items %}
+
+                        <a class="btn btn-outline-secondary m-2" data-bs-toggle="collapse" href="#{{sub_gr_number}}sub{{forloop.counter}}" role="button" aria-expanded="false">
+                            <p class="text-start">
+                                {{ name_sub_gr }}
+                            </p>
+                        </a>
+
+                        <div class="collapse multi-collapse" id="{{sub_gr_number}}sub{{forloop.counter}}">
+                            <table class="table" >
+                                <tbody>
+                                    {% for id_measure, name_measure in value2.items %}
+                                    <tr>
+                                        <td> <strong> {{ id_measure }}: </strong> {{  name_measure }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

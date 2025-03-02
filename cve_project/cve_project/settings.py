@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'cve_manager',
-
+    'threats',
+    'assistant',
     # 3rd party apps
     'django.contrib.postgres',
 ]
